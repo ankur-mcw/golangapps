@@ -35,9 +35,8 @@ func generateLabel(ctx *fasthttp.RequestCtx) {
         response, err := processor.GenerateLabel(reqBody)
         ctx.SetContentType("application/json")
         if err != nil {
-            // fmt.Printf("error: %s", err)
             ctx.SetStatusCode(400)
-            // json.NewEncoder(ctx).Encode(errorResponse{err})
+            json.NewEncoder(ctx).Encode(errorResponse{err.Error()})
         } else {
             ctx.SetStatusCode(201)
             json.NewEncoder(ctx).Encode(response)
@@ -45,7 +44,7 @@ func generateLabel(ctx *fasthttp.RequestCtx) {
     }
 }
 
-// Start starts the server and registers endppints
+// Start the server and registers endppints
 func Start(port string) error {
 	router := fasthttprouter.New()
 	router.GET("/health", health)
