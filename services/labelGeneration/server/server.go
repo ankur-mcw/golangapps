@@ -2,10 +2,12 @@ package server
 
 import (
     "encoding/json"
-	"log"
-	"github.com/buaazp/fasthttprouter"
+    "fmt"
+    "github.com/buaazp/fasthttprouter"
+    "github.com/ankur-mcw/golangapps/services/labelGeneration/processor"
+    "github.com/narvar/NarvarGolangApps/nlog"
+    "github.com/narvar/NarvarGolangApps/ntime"
     "github.com/valyala/fasthttp"
-    "../processor"
 )
 
 type errorResponse struct {
@@ -17,15 +19,15 @@ func health(ctx *fasthttp.RequestCtx) {
 }
 
 func generateLabel(ctx *fasthttp.RequestCtx) {
-
+    startupSeqBeginTime := ntime.NtimeNow()
     tracerID := string(ctx.Request.Header.Peek("X-Narvar-Tracer-ID"))
-    log.Printf("tracerID=%s", tracerID)
+    nlog.Debugf("tracerID=%s", tracerID)
 
     mockResponse := string(ctx.Request.Header.Peek("X-Mock-Response"))
-    log.Printf("mockResponse=%s", mockResponse)
+    nlog.Debugf("mockResponse=%s", mockResponse)
 
     experimental := string(ctx.Request.Header.Peek("X-Narvar-Experimental"))
-    log.Printf("experimental=%s", experimental)
+    nlog.Debugf("experimental=%s", experimental)
     
     var reqBody processor.LabelGenerationRequest
     err := json.Unmarshal(ctx.PostBody(), &reqBody)
@@ -42,14 +44,15 @@ func generateLabel(ctx *fasthttp.RequestCtx) {
             json.NewEncoder(ctx).Encode(response)
         }
     }
+    nlog.Debugf("Responded in %v", ntime.Since(startupSeqBeginTime))
 }
 
-// Start the server and registers endppints
-func Start(port string) error {
+// Start the server and registers endpoints
+func Start(port int) error {
 	router := fasthttprouter.New()
 	router.GET("/health", health)
-	router.POST("/api/v1//carrier/label", generateLabel)
+	router.POST("/api/v1/carrier/label", generateLabel)
 
-	log.Printf("Server running on port %s", port)
-    return fasthttp.ListenAndServe(":" + port, router.Handler)
+	nlog.Infof("Server running on port %d", port)
+    return fasthttp.ListenAndServe(fmt.Sprint(":", port), router.Handler)
 }

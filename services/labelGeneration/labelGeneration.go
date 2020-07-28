@@ -1,13 +1,19 @@
 package main
 
 import (
-    "log"
-    "./server"
+    "os"
+    "github.com/ankur-mcw/golangapps/services/labelGeneration/server"
+    "github.com/narvar/NarvarGolangApps/nlog"
 )
 
-func main()  { 
-    err := server.Start("7070")
+func main()  {
+    nlog.InitStdoutLogging("DEBUG")
+    appPort := 7070
+    err := server.Start(appPort)
     if err != nil {
-        log.Fatal(err)
+        nlog.Errorf("Failed fasthttp.ListenAndServe at port %d: %s.", appPort, err)
+    } else {
+        nlog.Errorf("Failed fasthttp.ListenAndServe at port %d.", appPort)
     }
+    os.Exit(1)
 }

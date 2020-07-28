@@ -1,0 +1,6 @@
+*errorLog
+*DS_Store
+.vscode/*
+.idea/*
+reports/*
+services/labelGeneration/labelGeneration
